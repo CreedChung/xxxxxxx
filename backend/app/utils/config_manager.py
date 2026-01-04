@@ -17,30 +17,33 @@ class ConfigManager:
     
     def load_config(self) -> Dict:
         """从本地JSON文件加载配置"""
+        # 使用固定的 API 配置（不允许用户修改）
         default_config = {
-            'api_key': '',
+            'api_key': 'sk-947751651f228c1862d92fac8372f6e6',
             'base_url': 'https://apis.iflow.cn/v1',
             'model_name': 'gpt-3.5-turbo'
         }
-        
+
+        # 只有 model_name 可以被用户自定义
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     loaded_config = json.load(f)
-                    default_config.update(loaded_config)
+                    # 只更新 model_name，保留 api_key 和 base_url 的默认值
+                    if 'model_name' in loaded_config:
+                        default_config['model_name'] = loaded_config['model_name']
             except Exception:
                 pass  # 如果读取失败，使用默认配置
-        
+
         return default_config
     
     def save_config(self, api_key: str, base_url: str, model_name: str) -> bool:
         """保存配置到本地JSON文件"""
+        # 只保存 model_name，忽略 api_key 和 base_url
         config = {
-            'api_key': api_key,
-            'base_url': base_url,
             'model_name': model_name
         }
-        
+
         try:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(config, f, ensure_ascii=False, indent=2)

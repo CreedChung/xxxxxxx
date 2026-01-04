@@ -22,35 +22,15 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
 
   const loadConfig = async () => {
     try {
-      // 先从环境变量读取默认值
-      const envApiKey = process.env.REACT_APP_API_KEY;
-      const defaultConfig: ConfigData = {
-        api_key: envApiKey || '',
-        base_url: 'https://apis.iflow.cn/v1',
-        model_name: 'gpt-3.5-turbo',
-      };
-
+      // 从后端加载配置（已包含固定的 API Key 和 Base URL）
       const response = await configApi.loadConfig();
       if (response.data) {
-        // 如果服务器有配置，使用服务器的配置
         setLocalConfig(response.data);
         onConfigChange(response.data);
-      } else {
-        // 否则使用环境变量中的默认值
-        setLocalConfig(defaultConfig);
-        onConfigChange(defaultConfig);
       }
     } catch (error) {
       console.error('加载配置失败:', error);
-      // 即使加载失败，也尝试使用环境变量
-      const envApiKey = process.env.REACT_APP_API_KEY;
-      const defaultConfig: ConfigData = {
-        api_key: envApiKey || '',
-        base_url: 'https://apis.iflow.cn/v1',
-        model_name: 'gpt-3.5-turbo',
-      };
-      setLocalConfig(defaultConfig);
-      onConfigChange(defaultConfig);
+      setMessage({ type: 'error', text: '加载配置失败' });
     }
   };
 
@@ -77,15 +57,10 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
   };
 
   const handleGetModels = async () => {
-    if (!localConfig.api_key) {
-      setMessage({ type: 'error', text: '请先输入API Key' });
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await configApi.getModels(localConfig);
-      
+
       if (response.data.success) {
         setModels(response.data.models);
         // 如果当前选中的模型不在新的模型列表中，则选择第一个可用模型
@@ -110,48 +85,14 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
         {/* 标题 */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">AI 标书</h1>
+          <p className="text-sm text-gray-500 mt-1">自动生成标书内容</p>
           <hr className="mt-4 border-gray-200" />
-        </div>
-
-        {/* 基本配置 */}
-        <div>
-          <h2 className="text-lg font-medium text-gray-900 mb-4">⚙️ 基本配置</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="api_key" className="block text-sm font-medium text-gray-700">
-                OpenAI API Key
-              </label>
-              <input
-                type="password"
-                id="api_key"
-                value={localConfig.api_key}
-                onChange={(e) => setLocalConfig({ ...localConfig, api_key: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                placeholder="输入你的OpenAI API密钥"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="base_url" className="block text-sm font-medium text-gray-700">
-                Base URL (可选)
-              </label>
-              <input
-                type="text"
-                id="base_url"
-                value={localConfig.base_url || ''}
-                onChange={(e) => setLocalConfig({ ...localConfig, base_url: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                placeholder="如果使用代理或其他服务，请输入base URL"
-              />
-            </div>
-          </div>
         </div>
 
         {/* 模型配置 */}
         <div>
-          <h3 className="text-base font-medium text-gray-900 mb-3">🤖 模型配置</h3>
-          
+          <h2 className="text-lg font-medium text-gray-900 mb-4">🤖 模型配置</h2>
+
           <button
             onClick={handleGetModels}
             disabled={loading}
@@ -205,8 +146,8 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
         {/* 消息提示 */}
         {message && (
           <div className={`p-3 rounded-md text-sm ${
-            message.type === 'success' 
-              ? 'bg-green-100 text-green-700 border border-green-200' 
+            message.type === 'success'
+              ? 'bg-green-100 text-green-700 border border-green-200'
               : 'bg-red-100 text-red-700 border border-red-200'
           }`}>
             {message.text}
@@ -217,13 +158,11 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
         <div className="border-t border-gray-200 pt-4">
           <h3 className="text-sm font-medium text-gray-900 mb-2">📋 使用说明</h3>
           <div className="text-sm text-gray-600 space-y-1">
-            <p>1. 配置API密钥和Base URL</p>
-            <p>2. 选择或输入模型名称</p>
-            <p>3. 按步骤完成标书编写流程</p>
+            <p>1. 点击"获取可用模型"按钮</p>
+            <p>2. 从下拉列表中选择模型</p>
+            <p>3. 保存配置并开始使用</p>
           </div>
         </div>
-
-      
       </div>
     </div>
   );
