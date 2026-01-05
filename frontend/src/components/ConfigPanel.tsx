@@ -161,6 +161,11 @@ const ConfigPanel: React.FC<ConfigPanelProps> = ({ config, onConfigChange }) => 
             <p>1. 点击"获取可用模型"按钮</p>
             <p>2. 从下拉列表中选择模型</p>
             <p>3. 保存配置并开始使用</p>
+            <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+              <p className="text-xs text-blue-800">
+                <strong>模型推荐：</strong>deepseekv3.2(性价比高)、qwen3-235b-a22b-instruct(长文档处理)、qwen3-max(综合能力强)
+              </p>
+            </div>
           </div>
         </div>
       </div>
