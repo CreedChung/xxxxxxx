@@ -43,9 +43,16 @@ def build_and_copy_frontend():
         print("执行 npm run build...")
         result = subprocess.run(['npm', 'run', 'build'], capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"ERROR: 前端构建失败: {result.stderr}")
+            print(f"ERROR: 前端构建失败 (返回码: {result.returncode})")
+            if result.stderr:
+                print(f"错误信息: {result.stderr}")
+            if result.stdout:
+                print(f"输出信息: {result.stdout}")
             return False
         print("✓ 前端构建完成")
+        # npm 可能有警告信息，但构建成功了
+        if result.stderr and 'npm notice' in result.stderr:
+            print("提示: npm 有版本更新通知，但这不影响构建")
 
         # 确保backend/static目录存在
         print(f"创建/清理后端静态目录: {backend_static_dir}")
@@ -91,7 +98,12 @@ if __name__ == "__main__":
     print("\n准备前端资源...")
     if not build_and_copy_frontend():
         print("\nWARNING: 前端构建失败，服务器将启动但前端可能无法正常访问")
-        input("按回车键继续启动服务器...")
+        # 检查是否在交互式环境中运行
+        try:
+            input("按回车键继续启动服务器...")
+        except EOFError:
+            # 非交互式环境（如脚本、CI等），自动继续
+            print("检测到非交互式环境，自动启动服务器...")
 
     print("\n启动后端服务...")
     uvicorn.run(
