@@ -2,6 +2,7 @@
 import json
 import os
 from typing import Dict, Optional
+from dotenv import load_dotenv
 
 
 class ConfigManager:
@@ -17,14 +18,17 @@ class ConfigManager:
     
     def load_config(self) -> Dict:
         """从本地JSON文件加载配置"""
-        # 使用固定的 API 配置（不允许用户修改）
+        # 加载 .env 文件（如果存在）
+        load_dotenv()
+
+        # 优先使用环境变量，否则使用默认值
         default_config = {
-            'api_key': 'sk-947751651f228c1862d92fac8372f6e6',
-            'base_url': 'https://apis.iflow.cn/v1',
-            'model_name': 'gpt-3.5-turbo'
+            'api_key': os.environ.get('API_KEY', 'sk-947751651f228c1862d92fac8372f6e6'),
+            'base_url': os.environ.get('API_BASE_URL', 'https://apis.iflow.cn/v1'),
+            'model_name': os.environ.get('MODEL_NAME', 'gpt-3.5-turbo')
         }
 
-        # 只有 model_name 可以被用户自定义
+        # 允许用户自定义 model_name（存储在本地的配置会覆盖默认值）
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
