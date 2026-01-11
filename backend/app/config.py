@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     
     # OpenAI默认设置
     default_model: str = "gpt-3.5-turbo"
+    # API配置（支持自定义API）
+    api_key: Optional[str] = None
+    api_base_url: Optional[str] = None
     
     class Config:
         env_file = ".env"
